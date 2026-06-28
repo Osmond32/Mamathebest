@@ -1,0 +1,317 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
+import { SignedIn, SignedOut, SignIn, useAuth } from '@clerk/clerk-react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { setupInterceptors } from './services/api';
+import { getBambini, createBambino, deleteBambino } from './services/bambiniService';
+import { getStatistiche } from './services/statisticheService';
+import { getAlimentazione, createAlimentazione, deleteAlimentazione } from './services/alimentazioneService';
+import { getPesate, createPesata, deletePesata } from './services/pesateService';
+
+import BottomNav from './components/BottomNav';
+import logo from './assets/logo.png';
+import Dashboard from './pages/Dashboard';
+import Diario from './pages/Diario';
+import Profilo from './pages/Profilo';
+import FAB from './components/FAB';
+import LogModal from './components/LogModal';
+import { Baby, Heart } from 'lucide-react';
+import { useLanguage } from './context/LanguageContext';
+
+function AppContent() {
+  const { getToken } = useAuth();
+  setupInterceptors(getToken);
+  
+  const queryClient = useQueryClient();
+  const { t, language, setLanguage } = useLanguage();
+  const navigate = useNavigate();
+
+  // Stati dell'app
+  const [selectedBambinoId, setSelectedBambinoId] = useState(null);
+  const [dataRiferimento, setDataRiferimento] = useState(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
+
+  // Stato per il LogModal
+  const [logModalType, setLogModalType] = useState(null); // 'latte', 'pappa', 'peso' o null
+
+  // 1. Query: Recupera tutti i bambini
+  const { 
+    data: bambini = [], 
+    isLoading: isLoadingBambini,
+    error: errorBambini
+  } = useQuery({
+    queryKey: ['bambini'],
+    queryFn: getBambini
+  });
+
+  // Aggiorna selectedBambinoId se non impostato o se il bambino selezionato viene eliminato
+  useEffect(() => {
+    if (bambini.length > 0) {
+      if (!selectedBambinoId || !bambini.some(b => b.id_bambini === Number(selectedBambinoId))) {
+        setSelectedBambinoId(bambini[0].id_bambini);
+      }
+    } else {
+      setSelectedBambinoId(null);
+    }
+  }, [bambini, selectedBambinoId]);
+
+  // 2. Query: Recupera statistiche del bambino selezionato
+  const {
+    data: stats,
+    isLoading: isLoadingStats,
+    error: errorStats
+  } = useQuery({
+    queryKey: ['stats', selectedBambinoId, dataRiferimento],
+    queryFn: () => getStatistiche(selectedBambinoId, dataRiferimento),
+    enabled: !!selectedBambinoId,
+  });
+
+  // 3. Query: Recupera alimentazioni del bambino selezionato per il diario
+  const {
+    data: alimentazioni = [],
+    isLoading: isLoadingAlimentazioni
+  } = useQuery({
+    queryKey: ['alimentazioni', selectedBambinoId],
+    queryFn: () => getAlimentazione(selectedBambinoId),
+    enabled: !!selectedBambinoId,
+  });
+
+  // 4. Query: Recupera pesate del bambino selezionato per il diario
+  const {
+    data: pesate = [],
+    isLoading: isLoadingPesate
+  } = useQuery({
+    queryKey: ['pesate', selectedBambinoId],
+    queryFn: () => getPesate(selectedBambinoId),
+    enabled: !!selectedBambinoId,
+  });
+
+  // --- MUTATIONS ---
+
+  // A. Crea bambino
+  const createBambinoMutation = useMutation({
+    mutationFn: createBambino,
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['bambini'] });
+      // Seleziona automaticamente il bambino creato
+      if (data.id_bambini) {
+        setSelectedBambinoId(data.id_bambini);
+        navigate('/dashboard');
+      }
+    }
+  });
+
+  // B. Elimina bambino
+  const deleteBambinoMutation = useMutation({
+    mutationFn: deleteBambino,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bambini'] });
+    }
+  });
+
+  // C. Salva Pasto/Pesata
+  const saveLogMutation = useMutation({
+    mutationFn: (data) => {
+      if (logModalType === 'peso') {
+        return createPesata(data);
+      } else {
+        return createAlimentazione(data);
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stats', selectedBambinoId] });
+      queryClient.invalidateQueries({ queryKey: ['alimentazioni', selectedBambinoId] });
+      queryClient.invalidateQueries({ queryKey: ['pesate', selectedBambinoId] });
+    }
+  });
+
+  // D. Elimina Alimentazione
+  const deleteAlimentazioneMutation = useMutation({
+    mutationFn: deleteAlimentazione,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stats', selectedBambinoId] });
+      queryClient.invalidateQueries({ queryKey: ['alimentazioni', selectedBambinoId] });
+    }
+  });
+
+  // E. Elimina Pesata
+  const deletePesataMutation = useMutation({
+    mutationFn: deletePesata,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stats', selectedBambinoId] });
+      queryClient.invalidateQueries({ queryKey: ['pesate', selectedBambinoId] });
+    }
+  });
+
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col max-w-md mx-auto border-x border-slate-100 relative shadow-2xl">
+      {/* Top Header */}
+      <header className="bg-white border-b border-slate-100 px-6 py-4 sticky top-0 z-30 flex items-center justify-between">
+        <div className="flex items-center space-x-2">
+          <img src={logo} alt="Mamathebest logo" className="w-8 h-8 rounded-xl object-cover shadow-sm border border-slate-100" />
+          <h1 className="text-base font-extrabold text-slate-800 tracking-tight font-display !my-0">Mamathebest</h1>
+        </div>
+
+        {/* Language Switcher */}
+        <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+          <button 
+            onClick={() => setLanguage('it')}
+            className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
+              language === 'it' ? 'bg-white text-primary-500 shadow-sm' : 'text-slate-500'
+            }`}
+          >
+            IT
+          </button>
+          <button 
+            onClick={() => setLanguage('fr')}
+            className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
+              language === 'fr' ? 'bg-white text-primary-500 shadow-sm' : 'text-slate-500'
+            }`}
+          >
+            FR
+          </button>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 px-6 pt-6 overflow-x-hidden">
+        <Routes>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route 
+            path="/dashboard" 
+            element={
+              <Dashboard 
+                bambini={bambini}
+                selectedBambinoId={selectedBambinoId}
+                setSelectedBambinoId={setSelectedBambinoId}
+                stats={stats}
+                isLoading={isLoadingStats}
+                error={errorStats}
+                dataRiferimento={dataRiferimento}
+                setDataRiferimento={setDataRiferimento}
+                onNavigateToProfile={() => navigate('/profilo')}
+              />
+            } 
+          />
+          <Route 
+            path="/diario" 
+            element={
+              <Diario 
+                alimentazioni={alimentazioni}
+                pesate={pesate}
+                isLoading={isLoadingAlimentazioni || isLoadingPesate}
+                onDeleteAlimentazione={deleteAlimentazioneMutation.mutateAsync}
+                onDeletePesata={deletePesataMutation.mutateAsync}
+              />
+            } 
+          />
+          <Route 
+            path="/profilo" 
+            element={
+              <Profilo 
+                bambini={bambini}
+                onCreateBambino={createBambinoMutation.mutateAsync}
+                onDeleteBambino={deleteBambinoMutation.mutateAsync}
+                alimentazioni={alimentazioni}
+                pesate={pesate}
+                stats={stats}
+                selectedBambinoId={selectedBambinoId}
+              />
+            } 
+          />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        </Routes>
+      </main>
+
+      {/* Floating Action Button */}
+      {selectedBambinoId && (
+        <FAB onSelectAction={(type) => setLogModalType(type)} />
+      )}
+
+      {/* Bottom Navigation */}
+      <BottomNav />
+
+      {/* Action modal picker */}
+      <LogModal 
+        isOpen={logModalType !== null}
+        onClose={() => setLogModalType(null)}
+        type={logModalType}
+        bambinoId={selectedBambinoId}
+        onSave={saveLogMutation.mutateAsync}
+      />
+    </div>
+  );
+}
+
+export default function App() {
+  const { t, language, setLanguage } = useLanguage();
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
+
+  return (
+    <Router>
+      <SignedIn>
+        <AppContent />
+      </SignedIn>
+      
+      <SignedOut>
+        <div className="min-h-screen bg-gradient-to-br from-primary-100 via-white to-rose-100 flex flex-col justify-center items-center px-6 relative">
+          
+          {/* Language Switcher for Sign-out Page */}
+          <div className="absolute top-6 right-6 flex bg-white/70 backdrop-blur-sm p-0.5 rounded-xl border border-slate-200/50 shadow-sm">
+            <button 
+              onClick={() => setLanguage('it')}
+              className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
+                language === 'it' ? 'bg-white text-primary-500 shadow-sm' : 'text-slate-500'
+              }`}
+            >
+              IT
+            </button>
+            <button 
+              onClick={() => setLanguage('fr')}
+              className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
+                language === 'fr' ? 'bg-white text-primary-500 shadow-sm' : 'text-slate-500'
+              }`}
+            >
+              FR
+            </button>
+          </div>
+
+          <div className="text-center max-w-sm mb-8">
+            <div className="inline-flex p-1.5 bg-white rounded-3xl shadow-xl shadow-primary-500/10 mb-5 border border-primary-50">
+              <img src={logo} alt="Mamathebest logo" className="w-20 h-20 rounded-2xl object-cover animate-bounce" />
+            </div>
+            <h1 className="text-3xl font-black text-slate-800 tracking-tight font-display !mb-2 !my-0">{t('welcome')}</h1>
+            <p className="text-slate-500 text-sm font-medium">
+              {t('app_subtitle')}
+            </p>
+          </div>
+
+          <div className="bg-white/80 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-white/50 w-full max-w-sm flex justify-center items-center">
+            <SignIn 
+              appearance={{
+                elements: {
+                  card: 'shadow-none bg-transparent',
+                  headerTitle: 'text-slate-800 font-bold font-display',
+                  headerSubtitle: 'text-slate-500 font-medium',
+                  socialButtonsBlockButton: 'border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl',
+                  formButtonPrimary: 'bg-primary-500 hover:bg-primary-600 text-white rounded-xl',
+                  formFieldInput: 'border-slate-200 rounded-xl',
+                  footerActionLink: 'text-primary-500 hover:text-primary-600'
+                }
+              }}
+            />
+          </div>
+        </div>
+      </SignedOut>
+    </Router>
+  );
+}
