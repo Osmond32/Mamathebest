@@ -23,7 +23,7 @@ export const translations = {
     solids: 'Pappe',
     last_weight: 'Ultimo Peso',
     no_prev_weight: 'Nessuna pesata precedente',
-    compared_to_last_week: 'rispetto a 1 sett. fa',
+    compared_to_last_month: 'rispetto al mese scorso',
     
     // Growth Chart
     growth_curve: 'Curva di Crescita (Peso)',
@@ -128,7 +128,7 @@ export const translations = {
     solids: 'Solides',
     last_weight: 'Dernier Poids',
     no_prev_weight: 'Aucune pesée précédente',
-    compared_to_last_week: 'par rapport à la semaine dern.',
+    compared_to_last_month: 'par rapport au mois dernier',
     
     // Growth Chart
     growth_curve: 'Courbe de croissance (Poids)',

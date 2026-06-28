@@ -28,16 +28,16 @@ export const getBambinoStatistiche = async (req, res) => {
         const datiGiorno = await StatisticheModel.getDatiAlimentazioneGiorno(bambino_id, dataSelezionata);
         const storicoPesate = await StatisticheModel.getStoricoPesate(bambino_id);
 
-        // 4. Elabora la differenza di peso settimana su settimana
+        // 4. Elabora la differenza di peso mese su mese (rispetto a circa 30 giorni fa)
         let pesoAttuale = null;
-        let differenzaSettimanale = null;
+        let differenzaMensile = null;
 
         if (storicoPesate.length > 0) {
             const latest = storicoPesate[0];
             pesoAttuale = latest.peso_kg;
 
             const latestTime = new Date(latest.data_pesata).getTime();
-            const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+            const oneMonthMs = 30 * 24 * 60 * 60 * 1000;
 
             let closestPrevious = null;
             let smallestDiff = Infinity;
@@ -46,20 +46,20 @@ export const getBambinoStatistiche = async (req, res) => {
                 const prevTime = new Date(storicoPesate[i].data_pesata).getTime();
                 const elapsed = latestTime - prevTime;
 
-                // Calcola la distanza temporale ideale da 7 giorni (oneWeekMs)
-                const diffFromOneWeek = Math.abs(elapsed - oneWeekMs);
+                // Calcola la distanza temporale ideale da 30 giorni (oneMonthMs)
+                const diffFromOneMonth = Math.abs(elapsed - oneMonthMs);
 
-                // Consideriamo valide solo pesate avvenute da almeno 4 giorni
-                if (elapsed >= 4 * 24 * 60 * 60 * 1000) {
-                    if (diffFromOneWeek < smallestDiff) {
-                        smallestDiff = diffFromOneWeek;
+                // Consideriamo valide solo pesate avvenute da almeno 15 giorni
+                if (elapsed >= 15 * 24 * 60 * 60 * 1000) {
+                    if (diffFromOneMonth < smallestDiff) {
+                        smallestDiff = diffFromOneMonth;
                         closestPrevious = storicoPesate[i];
                     }
                 }
             }
 
             if (closestPrevious) {
-                differenzaSettimanale = Number((pesoAttuale - closestPrevious.peso_kg).toFixed(3));
+                differenzaMensile = Number((pesoAttuale - closestPrevious.peso_kg).toFixed(3));
             }
         }
 
@@ -80,7 +80,7 @@ export const getBambinoStatistiche = async (req, res) => {
             },
             crescita_peso: {
                 peso_attuale_kg: pesoAttuale,
-                differenza_settimanale_kg: differenzaSettimanale,
+                differenza_mensile_kg: differenzaMensile,
                 storico_pesate: storicoPesate
             }
         });

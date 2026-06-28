@@ -184,14 +184,14 @@ export default function Dashboard({
               <span className="text-2xl font-extrabold text-amber-800">{stats?.crescita_peso?.peso_attuale_kg || '--'}</span>
               <span className="text-xs text-amber-700 font-bold ml-1">{stats?.crescita_peso?.peso_attuale_kg ? 'kg' : ''}</span>
               <span className={`block text-[10px] font-bold mt-1.5 ${
-                stats?.crescita_peso?.differenza_settimanale_kg > 0 
+                stats?.crescita_peso?.differenza_mensile_kg > 0 
                   ? 'text-emerald-600' 
-                  : stats?.crescita_peso?.differenza_settimanale_kg < 0 
+                  : stats?.crescita_peso?.differenza_mensile_kg < 0 
                   ? 'text-rose-600' 
                   : 'text-slate-600'
               }`}>
-                {stats?.crescita_peso?.differenza_settimanale_kg !== null && stats?.crescita_peso?.differenza_settimanale_kg !== undefined
-                  ? `${stats.crescita_peso.differenza_settimanale_kg >= 0 ? '+' : ''}${stats.crescita_peso.differenza_settimanale_kg * 1000}g ${t('compared_to_last_week')}`
+                {stats?.crescita_peso?.differenza_mensile_kg !== null && stats?.crescita_peso?.differenza_mensile_kg !== undefined
+                  ? `${stats.crescita_peso.differenza_mensile_kg >= 0 ? '+' : ''}${stats.crescita_peso.differenza_mensile_kg * 1000}g ${t('compared_to_last_month')}`
                   : t('no_prev_weight')}
               </span>
             </div>
