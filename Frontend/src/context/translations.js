@@ -35,6 +35,9 @@ export const translations = {
     no_baby_registered: 'Nessun bambino registrato',
     no_baby_desc: 'Registra il tuo primo bambino nella sezione Profilo per iniziare a monitorare la sua crescita e i suoi pasti.',
     add_baby_btn: 'Aggiungi un Bambino 👶',
+    feed_label: 'Poppata',
+    solid_label: 'Pappa Solida',
+    weight_label: 'Pesata',
     
     // Diario / Timeline
     diario_title: 'Diario Attività',
@@ -140,6 +143,9 @@ export const translations = {
     no_baby_registered: 'Aucun bébé enregistré',
     no_baby_desc: 'Enregistrez votre premier bébé dans la section Profil pour commencer à suivre sa croissance et ses repas.',
     add_baby_btn: 'Ajouter un bébé 👶',
+    feed_label: 'Tétée',
+    solid_label: 'Repas Solide',
+    weight_label: 'Pesée',
     
     // Diario / Timeline
     diario_title: 'Journal d\'activité',
