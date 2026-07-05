@@ -38,6 +38,7 @@ export const translations = {
     feed_label: 'Poppata',
     solid_label: 'Pappa Solida',
     weight_label: 'Pesata',
+    diaper_label: 'Evacuazione/Pannolino',
     
     // Diario / Timeline
     diario_title: 'Diario Attività',
@@ -46,9 +47,12 @@ export const translations = {
     filter_milk: '🍼 Latte',
     filter_solids: '🍲 Pappe',
     filter_weight: '⚖️ Peso',
+    filter_diaper: '🧷 Pannolini',
     no_activity: 'Nessuna attività registrata',
     no_activity_desc: 'Non ci sono registrazioni corrispondenti al filtro selezionato per questo bambino.',
     confirm_delete: 'Sei sicura di voler eliminare questa registrazione?',
+    show_all: 'Mostra storico completo',
+    filter_by_day: 'Filtra per giorno',
     
     // Profilo & Impostazioni
     profile_title: 'Profilo & Impostazioni',
@@ -91,6 +95,15 @@ export const translations = {
     feed_title: 'Registra Poppata 🍼',
     solid_title: 'Registra Pappa Solida 🍲',
     weight_title: 'Registra Pesata ⚖️',
+    diaper_title: 'Registra Evacuazione 🧷',
+    diaper_type: 'Tipo di evacuazione',
+    cacca_opt: '💩 Solo Cacca',
+    pipi_opt: '💧 Solo Pipì',
+    entrambe_opt: '✨ Entrambe',
+    diapers_today: 'Pannolini di oggi',
+    poo: 'Cacca',
+    pee: 'Pipì',
+    both: 'Entrambe',
     add_activity: 'Aggiungi Attività',
     milk_amount: 'Quantità di Latte',
     milk_type: 'Tipo di Latte',
@@ -146,6 +159,7 @@ export const translations = {
     feed_label: 'Tétée',
     solid_label: 'Repas Solide',
     weight_label: 'Pesée',
+    diaper_label: 'Évacuation/Couche',
     
     // Diario / Timeline
     diario_title: 'Journal d\'activité',
@@ -154,9 +168,12 @@ export const translations = {
     filter_milk: '🍼 Lait',
     filter_solids: '🍲 Solides',
     filter_weight: '⚖️ Poids',
+    filter_diaper: '🧷 Couches',
     no_activity: 'Aucune activité enregistrée',
     no_activity_desc: 'Il n\'y a pas d\'enregistrements correspondant au filtre sélectionné pour ce bébé.',
     confirm_delete: 'Êtes-vous sûre de vouloir supprimer cet enregistrement ?',
+    show_all: 'Afficher tout l\'historique',
+    filter_by_day: 'Filtrer par jour',
     
     // Profil & Impostazioni
     profile_title: 'Profil & Paramètres',
@@ -199,6 +216,15 @@ export const translations = {
     feed_title: 'Enregistrer une tétée 🍼',
     solid_title: 'Enregistrer un repas solide 🍲',
     weight_title: 'Enregistrer une pesée ⚖️',
+    diaper_title: 'Enregistrer une Évacuation 🧷',
+    diaper_type: 'Type d\'évacuation',
+    cacca_opt: '💩 Caca seulement',
+    pipi_opt: '💧 Pipi seulement',
+    entrambe_opt: 'Les deux',
+    diapers_today: 'Couches d\'aujourd\'hui',
+    poo: 'Caca',
+    pee: 'Pipi',
+    both: 'Les deux',
     add_activity: 'Ajouter une activité',
     milk_amount: 'Quantité de lait',
     milk_type: 'Type de lait',

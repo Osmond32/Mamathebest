@@ -27,6 +27,7 @@ export const getBambinoStatistiche = async (req, res) => {
         const totaleLatte24h = await StatisticheModel.getTotaleLatte24h(bambino_id);
         const datiGiorno = await StatisticheModel.getDatiAlimentazioneGiorno(bambino_id, dataSelezionata);
         const storicoPesate = await StatisticheModel.getStoricoPesate(bambino_id);
+        const evacuazioniGiorno = await StatisticheModel.getEvacuazioniGiorno(bambino_id, dataSelezionata);
 
         // 4. Elabora la differenza di peso mese su mese (rispetto a circa 30 giorni fa)
         let pesoAttuale = null;
@@ -78,6 +79,7 @@ export const getBambinoStatistiche = async (req, res) => {
                 numero_poppate: datiGiorno.numero_poppate,
                 numero_pappe_solide: datiGiorno.numero_pappe_solide
             },
+            evacuazioni_giorno: evacuazioniGiorno,
             crescita_peso: {
                 peso_attuale_kg: pesoAttuale,
                 differenza_mensile_kg: differenzaMensile,

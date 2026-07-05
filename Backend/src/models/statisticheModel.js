@@ -47,8 +47,30 @@ export const getStoricoPesate = async (bambino_id) => {
     }));
 };
 
+// Recupera il conteggio delle evacuazioni (cacca, pipi) per un giorno specifico
+export const getEvacuazioniGiorno = async (bambino_id, data) => {
+    const query = `
+        SELECT 
+            COUNT(CASE WHEN tipo = 'cacca' THEN 1 END) AS cacca,
+            COUNT(CASE WHEN tipo = 'pipi' THEN 1 END) AS pipi,
+            COUNT(CASE WHEN tipo = 'entrambe' THEN 1 END) AS entrambe,
+            COUNT(*) AS totale
+        FROM evacuazioni 
+        WHERE bambino_id = ? 
+          AND DATE(data_ora) = ?;
+    `;
+    const [rows] = await bdd.query(query, [bambino_id, data]);
+    return {
+        cacca: Number(rows[0].cacca || 0),
+        pipi: Number(rows[0].pipi || 0),
+        entrambe: Number(rows[0].entrambe || 0),
+        totale: Number(rows[0].totale || 0)
+    };
+};
+
 export default {
     getTotaleLatte24h,
     getDatiAlimentazioneGiorno,
-    getStoricoPesate
+    getStoricoPesate,
+    getEvacuazioniGiorno
 };

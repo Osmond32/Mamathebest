@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Baby, Calendar, HelpCircle, Utensils, Weight } from 'lucide-react';
+import { Plus, Baby, Calendar, HelpCircle, Utensils, Weight, Droplet } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function FAB({ onSelectAction }) {
@@ -10,6 +10,7 @@ export default function FAB({ onSelectAction }) {
     { id: 'latte', label: t('feed_label'), icon: Baby, color: 'bg-blue-500 shadow-blue-500/20 text-white hover:bg-blue-600' },
     { id: 'pappa', label: t('solid_label'), icon: Utensils, color: 'bg-emerald-500 shadow-emerald-500/20 text-white hover:bg-emerald-600' },
     { id: 'peso', label: t('weight_label'), icon: Weight, color: 'bg-amber-500 shadow-amber-500/20 text-white hover:bg-amber-600' },
+    { id: 'evacuazione', label: t('diaper_label'), icon: Droplet, color: 'bg-purple-500 shadow-purple-500/20 text-white hover:bg-purple-600' },
   ];
 
   const handleAction = (id) => {

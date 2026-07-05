@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Baby, 
   ChevronDown, 
@@ -7,9 +8,39 @@ import {
   Activity, 
   ChevronLeft, 
   ChevronRight, 
-  Sparkles 
+  Sparkles,
+  Droplet,
+  Utensils,
+  Soup,
+  Scale
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+
+const BiberonIcon = ({ className = '', size = 20, ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-5 h-5 shrink-0 ${className}`} {...props}>
+    {/* Tettarella */}
+    <path d="M11.5 4.5v-2c0-.6.4-1 .9-1s.9.4.9 1v2" />
+    {/* Ghiera/Cupola */}
+    <path d="M10 7.5c0-1.8 1-3 2-3s2 1.2 2 3" />
+    {/* Ghiera a vite */}
+    <rect x="8.5" y="7.5" width="7" height="1.5" rx="0.5" />
+    {/* Corpo ergonomico */}
+    <path d="M9 9c0 2.5 1 4.5 1 6c0 1.5-1 3.5-1 6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2c0-2.5-1-4.5-1-6c0-1.5 1-3.5 1-6Z" />
+    {/* Tacche millilitri */}
+    <line x1="11.5" y1="12" x2="13" y2="12" />
+    <line x1="11.5" y1="15" x2="12.5" y2="15" />
+    <line x1="11.5" y1="18" x2="13" y2="18" />
+  </svg>
+);
+
+const DiaperIcon = ({ className = '', size = 20, ...props }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`w-5 h-5 shrink-0 ${className}`} {...props}>
+    <path d="M3 5h18v4c0 3-2 6-5 8.5L12 20l-4-7.5C5 11 3 8 3 5z"/>
+    <path d="M3 8h18"/>
+    <path d="M6 5v3"/>
+    <path d="M18 5v3"/>
+  </svg>
+);
 
 const GrowthChart = React.lazy(() => import('../components/GrowthChart'));
 
@@ -22,9 +53,11 @@ export default function Dashboard({
   error, 
   dataRiferimento, 
   setDataRiferimento,
-  onNavigateToProfile
+  onNavigateToProfile,
+  onOpenLogModal
 }) {
   const { t, language } = useLanguage();
+  const navigate = useNavigate();
   const selectedBambino = bambini.find(b => b.id_bambini === Number(selectedBambinoId));
   const locale = language === 'it' ? 'it-IT' : 'fr-FR';
 
@@ -85,31 +118,6 @@ export default function Dashboard({
 
   return (
     <div className="space-y-6 pb-28 animate-slide-up">
-      {/* Header / Selector */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-gradient-to-br from-primary-500/10 to-rose-500/10 text-primary-500 rounded-2xl border border-primary-50/50 shadow-sm">
-            <Baby size={24} className="stroke-[2px]" />
-          </div>
-          <div>
-            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-wider block">{t('active_baby')}</span>
-            <div className="relative inline-flex items-center bg-slate-100/80 hover:bg-slate-100 px-3 py-1 rounded-xl border border-slate-200/50 transition-all duration-300">
-              <select
-                value={selectedBambinoId || ''}
-                onChange={(e) => setSelectedBambinoId(e.target.value)}
-                aria-label={t('active_baby')}
-                className="appearance-none pr-6 bg-transparent font-bold text-slate-800 focus:outline-none text-sm cursor-pointer"
-              >
-                {bambini.map(b => (
-                  <option key={b.id_bambini} value={b.id_bambini}>{b.nome}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-2 text-slate-600 pointer-events-none" />
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Date Navigator */}
       <div className="bg-white border border-slate-100/80 rounded-3xl p-4 shadow-sm flex items-center justify-between">
         <button 
@@ -143,7 +151,7 @@ export default function Dashboard({
             {/* Latte nelle ultime 24 ore */}
             <div className="bg-gradient-to-br from-blue-50/75 to-white border border-blue-100/50 rounded-3xl p-4 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 relative overflow-hidden">
               <div className="absolute right-2 top-2 bg-blue-100 text-blue-600 p-1.5 rounded-xl">
-                <Sparkles size={16} />
+                <BiberonIcon size={16} />
               </div>
               <span className="text-[11px] font-bold text-blue-600 uppercase tracking-wide block mb-1">{t('milk_24h')}</span>
               <span className="text-2xl font-extrabold text-blue-800">{stats?.alimentazione_24h?.totale_latte_ml || 0}</span>
@@ -151,39 +159,51 @@ export default function Dashboard({
             </div>
 
             {/* Latte giorno selezionato */}
-            <div className="bg-gradient-to-br from-indigo-50/75 to-white border border-indigo-100/50 rounded-3xl p-4 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 relative overflow-hidden">
+            <button 
+              onClick={() => navigate('/diario', { state: { date: dataRiferimento, filter: 'latte' } })}
+              className="text-left w-full bg-gradient-to-br from-indigo-50/75 to-white border border-indigo-100/50 rounded-3xl p-4 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 relative overflow-hidden cursor-pointer focus:outline-none"
+            >
               <div className="absolute right-2 top-2 bg-indigo-100 text-indigo-600 p-1.5 rounded-xl">
-                <Activity size={16} />
+                <BiberonIcon size={16} />
               </div>
               <span className="text-[11px] font-bold text-indigo-600 uppercase tracking-wide block mb-1">{t('milk_day')}</span>
               <span className="text-2xl font-extrabold text-indigo-800">{stats?.alimentazione_giorno?.totale_latte_ml || 0}</span>
               <span className="text-xs text-indigo-700 font-bold ml-1">ml</span>
-            </div>
+            </button>
 
             {/* Poppate e Pappe Giorno */}
-            <div className="bg-gradient-to-br from-emerald-50/75 to-white border border-emerald-100/50 rounded-3xl p-4 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
+            <div className="bg-gradient-to-br from-emerald-50/75 to-white border border-emerald-100/50 rounded-3xl p-3 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300">
               <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wide block mb-1">{t('meals_today')}</span>
               <div className="flex justify-between items-center mt-2">
-                <div className="text-center bg-white border border-emerald-100/50 py-1.5 px-3 rounded-2xl shadow-sm flex-1 mr-2">
+                <button 
+                  onClick={() => navigate('/diario', { state: { date: dataRiferimento, filter: 'latte' } })}
+                  className="text-center bg-white hover:bg-slate-50 border border-emerald-100/50 py-1 px-2 rounded-2xl shadow-sm flex-1 mr-1.5 cursor-pointer transition-all active:scale-95 focus:outline-none"
+                >
                   <span className="text-[10px] text-slate-600 block font-bold">{t('feedings')}</span>
                   <span className="text-base font-extrabold text-emerald-800">{stats?.alimentazione_giorno?.numero_poppate || 0}</span>
-                </div>
-                <div className="text-center bg-white border border-emerald-100/50 py-1.5 px-3 rounded-2xl shadow-sm flex-1">
+                </button>
+                <button 
+                  onClick={() => navigate('/diario', { state: { date: dataRiferimento, filter: 'pappa' } })}
+                  className="text-center bg-white hover:bg-slate-50 border border-emerald-100/50 py-1 px-2 rounded-2xl shadow-sm flex-1 cursor-pointer transition-all active:scale-95 focus:outline-none"
+                >
                   <span className="text-[10px] text-slate-600 block font-bold">{t('solids')}</span>
                   <span className="text-base font-extrabold text-emerald-800">{stats?.alimentazione_giorno?.numero_pappe_solide || 0}</span>
-                </div>
+                </button>
               </div>
             </div>
 
             {/* Peso e Variazione Settimanale */}
-            <div className="bg-gradient-to-br from-amber-50/75 to-white border border-amber-100/50 rounded-3xl p-4 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-300 relative overflow-hidden">
+            <button 
+              onClick={() => onOpenLogModal('peso')}
+              className="text-left bg-gradient-to-br from-amber-50/75 to-white border border-amber-100/50 rounded-3xl p-3 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 relative overflow-hidden cursor-pointer focus:outline-none"
+            >
               <div className="absolute right-2 top-2 bg-amber-100 text-amber-600 p-1.5 rounded-xl">
-                <Weight size={16} />
+                <Scale size={16} />
               </div>
               <span className="text-[11px] font-bold text-amber-600 uppercase tracking-wide block mb-1">{t('last_weight')}</span>
               <span className="text-2xl font-extrabold text-amber-800">{stats?.crescita_peso?.peso_attuale_kg || '--'}</span>
               <span className="text-xs text-amber-700 font-bold ml-1">{stats?.crescita_peso?.peso_attuale_kg ? 'kg' : ''}</span>
-              <span className={`block text-[10px] font-bold mt-1.5 ${
+              <span className={`block text-[10px] font-bold mt-1 ${
                 stats?.crescita_peso?.differenza_mensile_kg > 0 
                   ? 'text-emerald-600' 
                   : stats?.crescita_peso?.differenza_mensile_kg < 0 
@@ -194,6 +214,58 @@ export default function Dashboard({
                   ? `${stats.crescita_peso.differenza_mensile_kg >= 0 ? '+' : ''}${stats.crescita_peso.differenza_mensile_kg * 1000}g ${t('compared_to_last_month')}`
                   : t('no_prev_weight')}
               </span>
+            </button>
+
+            {/* Evacuazioni / Pannolini di oggi */}
+            <button 
+              onClick={() => navigate('/diario', { state: { date: dataRiferimento, filter: 'evacuazione' } })}
+              className="text-left bg-gradient-to-br from-purple-50/75 to-white border border-purple-100/50 rounded-3xl p-3 shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 relative overflow-hidden cursor-pointer focus:outline-none"
+            >
+              <div className="absolute right-2 top-2 bg-purple-100 text-purple-600 p-1.5 rounded-xl">
+                <DiaperIcon size={16} />
+              </div>
+              <span className="text-[11px] font-bold text-purple-600 uppercase tracking-wide block mb-1">{t('diapers_today')}</span>
+              <span className="text-2xl font-extrabold text-purple-800">{stats?.evacuazioni_giorno?.totale || 0}</span>
+              <span className="text-xs text-purple-700 font-bold ml-1">{language === 'it' ? 'cambi' : 'changes'}</span>
+            </button>
+
+            {/* Aggiungi Attività Quick Actions Card */}
+            <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-200/60 rounded-3xl p-3 shadow-sm relative overflow-hidden flex flex-col justify-between">
+              <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1.5">{t('add_activity')}</span>
+              <div className="grid grid-cols-4 gap-1.5 mt-1 items-center justify-items-center flex-1">
+                {/* Latte */}
+                <button 
+                  onClick={() => onOpenLogModal('latte')}
+                  aria-label="Registra Latte"
+                  className="flex items-center justify-center w-11 h-11 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
+                >
+                  <BiberonIcon className="w-5 h-5 shrink-0" />
+                </button>
+                {/* Pappa */}
+                <button 
+                  onClick={() => onOpenLogModal('pappa')}
+                  aria-label="Registra Pappa"
+                  className="flex items-center justify-center w-11 h-11 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
+                >
+                  <Soup className="w-5 h-5 shrink-0" />
+                </button>
+                {/* Peso */}
+                <button 
+                  onClick={() => onOpenLogModal('peso')}
+                  aria-label="Registra Peso"
+                  className="flex items-center justify-center w-11 h-11 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
+                >
+                  <Scale className="w-5 h-5 shrink-0" />
+                </button>
+                {/* Evacuazione */}
+                <button 
+                  onClick={() => onOpenLogModal('evacuazione')}
+                  aria-label="Registra Evacuazione"
+                  className="flex items-center justify-center w-11 h-11 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
+                >
+                  <DiaperIcon className="w-5 h-5 shrink-0" />
+                </button>
+              </div>
             </div>
           </div>
 
@@ -201,7 +273,7 @@ export default function Dashboard({
           <div className="bg-white border border-slate-100 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow duration-300">
             <div className="mb-4">
               <h4 className="text-sm font-bold text-slate-700 font-display flex items-center">
-                <Weight size={16} className="mr-1.5 text-primary-500" />
+                <Scale size={16} className="mr-1.5 text-primary-500" />
                 {t('growth_curve')}
               </h4>
               <span className="text-xs text-slate-600">{t('growth_history')}</span>

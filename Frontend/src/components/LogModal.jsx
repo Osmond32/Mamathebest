@@ -26,6 +26,9 @@ export default function LogModal({ isOpen, onClose, type, bambinoId, onSave }) {
   // Stato per Peso
   const [pesoKg, setPesoKg] = useState('');
 
+  // Stato per Evacuazione
+  const [tipoEvacuazione, setTipoEvacuazione] = useState('cacca');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -70,6 +73,13 @@ export default function LogModal({ isOpen, onClose, type, bambinoId, onSave }) {
           peso_kg: Number(pesoKg),
           data_pesata: formattedDate
         });
+      } else if (type === 'evacuazione') {
+        await onSave({
+          bambino_id: bambinoId,
+          tipo: tipoEvacuazione,
+          note,
+          data_ora: formattedDate
+        });
       }
       onClose();
     } catch (err) {
@@ -84,6 +94,7 @@ export default function LogModal({ isOpen, onClose, type, bambinoId, onSave }) {
       case 'latte': return t('feed_title');
       case 'pappa': return t('solid_title');
       case 'peso': return t('weight_title');
+      case 'evacuazione': return t('diaper_title');
       default: return t('add_activity');
     }
   };
@@ -219,6 +230,34 @@ export default function LogModal({ isOpen, onClose, type, bambinoId, onSave }) {
                 className="w-full py-2.5 px-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 outline-none text-sm font-semibold placeholder:font-normal placeholder:text-slate-500"
                 required
               />
+            </div>
+          )}
+
+          {type === 'evacuazione' && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2">
+                {t('diaper_type')}
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'cacca', label: t('cacca_opt') },
+                  { id: 'pipi', label: t('pipi_opt') },
+                  { id: 'entrambe', label: t('entrambe_opt') }
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setTipoEvacuazione(opt.id)}
+                    className={`py-2.5 px-1.5 rounded-xl border text-xs font-bold transition-all ${
+                      tipoEvacuazione === opt.id 
+                        ? 'border-primary-500 bg-primary-50 text-primary-600' 
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 

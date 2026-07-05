@@ -8,15 +8,15 @@ import { getBambini, createBambino, deleteBambino } from './services/bambiniServ
 import { getStatistiche } from './services/statisticheService';
 import { getAlimentazione, createAlimentazione, deleteAlimentazione } from './services/alimentazioneService';
 import { getPesate, createPesata, deletePesata } from './services/pesateService';
+import { getEvacuazioni, createEvacuazione, deleteEvacuazione } from './services/evacuazioniService';
 
 import BottomNav from './components/BottomNav';
 import logo from './assets/logo.png';
 import Dashboard from './pages/Dashboard';
 import Diario from './pages/Diario';
 import Profilo from './pages/Profilo';
-import FAB from './components/FAB';
 import LogModal from './components/LogModal';
-import { Baby, Heart } from 'lucide-react';
+import { Baby, Heart, ChevronDown } from 'lucide-react';
 import { useLanguage } from './context/LanguageContext';
 
 function AppContent() {
@@ -92,6 +92,16 @@ function AppContent() {
     enabled: !!selectedBambinoId,
   });
 
+  // 5. Query: Recupera evacuazioni del bambino selezionato per il diario
+  const {
+    data: evacuazioni = [],
+    isLoading: isLoadingEvacuazioni
+  } = useQuery({
+    queryKey: ['evacuazioni', selectedBambinoId],
+    queryFn: () => getEvacuazioni(selectedBambinoId),
+    enabled: !!selectedBambinoId,
+  });
+
   // --- MUTATIONS ---
 
   // A. Crea bambino
@@ -115,11 +125,13 @@ function AppContent() {
     }
   });
 
-  // C. Salva Pasto/Pesata
+  // C. Salva Pasto/Pesata/Evacuazione
   const saveLogMutation = useMutation({
     mutationFn: (data) => {
       if (logModalType === 'peso') {
         return createPesata(data);
+      } else if (logModalType === 'evacuazione') {
+        return createEvacuazione(data);
       } else {
         return createAlimentazione(data);
       }
@@ -128,6 +140,7 @@ function AppContent() {
       queryClient.invalidateQueries({ queryKey: ['stats', selectedBambinoId] });
       queryClient.invalidateQueries({ queryKey: ['alimentazioni', selectedBambinoId] });
       queryClient.invalidateQueries({ queryKey: ['pesate', selectedBambinoId] });
+      queryClient.invalidateQueries({ queryKey: ['evacuazioni', selectedBambinoId] });
     }
   });
 
@@ -149,21 +162,53 @@ function AppContent() {
     }
   });
 
+  // F. Elimina Evacuazione
+  const deleteEvacuazioneMutation = useMutation({
+    mutationFn: deleteEvacuazione,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['stats', selectedBambinoId] });
+      queryClient.invalidateQueries({ queryKey: ['evacuazioni', selectedBambinoId] });
+    }
+  });
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col max-w-md mx-auto border-x border-slate-100 relative shadow-2xl">
       {/* Top Header */}
-      <header className="bg-white border-b border-slate-100 px-6 py-4 sticky top-0 z-30 flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <img src={logo} alt="Mamathebest logo" className="w-8 h-8 rounded-xl object-cover shadow-sm border border-slate-100" />
-          <h1 className="text-base font-extrabold text-slate-800 tracking-tight font-display !my-0">Mamathebest</h1>
+      <header className="bg-primary-50/90 backdrop-blur-md border-b border-primary-100/50 px-4 py-3 sticky top-0 z-30 flex items-center justify-between gap-2">
+        <div 
+          onClick={() => navigate('/dashboard')}
+          className="flex items-center space-x-2 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          <img src={logo} alt="Mamathebest logo" className="w-8 h-8 rounded-xl object-cover shadow-sm border border-primary-100" />
+          <h1 className="text-sm font-black text-slate-800 tracking-tight font-display uppercase hidden xs:block !my-0">Mamathebest</h1>
         </div>
 
+        {/* Baby Selector in Header */}
+        {selectedBambinoId && bambini.length > 0 && (
+          <div className="flex items-center space-x-1.5 bg-white border border-primary-100/60 px-3 py-2 rounded-xl shadow-sm">
+            <Baby size={18} className="text-primary-500 shrink-0" />
+            <div className="relative inline-flex items-center">
+              <select
+                value={selectedBambinoId || ''}
+                onChange={(e) => setSelectedBambinoId(e.target.value)}
+                aria-label={t('active_baby')}
+                className="appearance-none pr-5 bg-transparent font-bold text-slate-800 focus:outline-none text-sm cursor-pointer [&>option]:text-slate-800 [&>option]:bg-white"
+              >
+                {bambini.map(b => (
+                  <option key={b.id_bambini} value={b.id_bambini}>{b.nome}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="absolute right-0 text-slate-500 pointer-events-none" />
+            </div>
+          </div>
+        )}
+
         {/* Language Switcher */}
-        <div className="flex bg-slate-100 p-0.5 rounded-xl border border-slate-200">
+        <div className="flex bg-primary-100/50 p-0.5 rounded-xl border border-primary-200/30">
           <button 
             onClick={() => setLanguage('it')}
             className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
-              language === 'it' ? 'bg-white text-primary-500 shadow-sm' : 'text-slate-500'
+              language === 'it' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-600 hover:text-primary-500'
             }`}
           >
             IT
@@ -171,7 +216,7 @@ function AppContent() {
           <button 
             onClick={() => setLanguage('fr')}
             className={`text-[10px] font-bold px-2 py-1 rounded-lg transition-all ${
-              language === 'fr' ? 'bg-white text-primary-500 shadow-sm' : 'text-slate-500'
+              language === 'fr' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-600 hover:text-primary-500'
             }`}
           >
             FR
@@ -196,6 +241,7 @@ function AppContent() {
                 dataRiferimento={dataRiferimento}
                 setDataRiferimento={setDataRiferimento}
                 onNavigateToProfile={() => navigate('/profilo')}
+                onOpenLogModal={(type) => setLogModalType(type)}
               />
             } 
           />
@@ -205,9 +251,11 @@ function AppContent() {
               <Diario 
                 alimentazioni={alimentazioni}
                 pesate={pesate}
-                isLoading={isLoadingAlimentazioni || isLoadingPesate}
+                evacuazioni={evacuazioni}
+                isLoading={isLoadingAlimentazioni || isLoadingPesate || isLoadingEvacuazioni}
                 onDeleteAlimentazione={deleteAlimentazioneMutation.mutateAsync}
                 onDeletePesata={deletePesataMutation.mutateAsync}
+                onDeleteEvacuazione={deleteEvacuazioneMutation.mutateAsync}
               />
             } 
           />
@@ -229,10 +277,7 @@ function AppContent() {
         </Routes>
       </main>
 
-      {/* Floating Action Button */}
-      {selectedBambinoId && (
-        <FAB onSelectAction={(type) => setLogModalType(type)} />
-      )}
+
 
       {/* Bottom Navigation */}
       <BottomNav />

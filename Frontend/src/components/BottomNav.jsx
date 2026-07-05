@@ -14,7 +14,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 shadow-lg px-6 py-2 z-40 max-w-md mx-auto rounded-t-2xl">
+    <nav className="fixed bottom-0 left-0 right-0 bg-slate-900 border-t border-slate-800/80 shadow-2xl px-6 py-2.5 z-40 max-w-md mx-auto rounded-t-3xl">
       <div className="flex justify-around items-center">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -25,14 +25,14 @@ export default function BottomNav() {
               key={tab.id}
               to={tab.path}
               aria-label={tab.label}
-              className={`flex flex-col items-center justify-center py-2 px-4 rounded-xl transition-all duration-300 ${
+              className={`flex flex-col items-center justify-center py-1.5 px-4 rounded-xl transition-all duration-300 ${
                 isActive 
-                  ? 'text-primary-500 scale-105 font-medium' 
-                  : 'text-slate-500 hover:text-slate-700'
+                  ? 'text-primary-400 scale-105 font-semibold' 
+                  : 'text-slate-400 hover:text-slate-200'
               }`}
             >
               <Icon size={22} className={`mb-1 transition-transform ${isActive ? 'stroke-[2.5px]' : 'stroke-[2px]'}`} />
-              <span className="text-[11px] tracking-wide">{tab.label}</span>
+              <span className="text-[11px] tracking-wide font-medium">{tab.label}</span>
             </Link>
           );
         })}
