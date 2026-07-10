@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Baby, Utensils, Weight, Trash2, Calendar, ChevronLeft, ChevronRight, Droplet, Soup, Scale } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -40,6 +40,7 @@ export default function Diario({
 }) {
   const { t, language } = useLanguage();
   const location = useLocation();
+  const navigate = useNavigate();
   const locale = language === 'it' ? 'it-IT' : 'fr-FR';
 
   const getTodayStr = () => {
@@ -161,10 +162,19 @@ export default function Diario({
 
   return (
     <div className="space-y-6 pb-28 animate-slide-up">
-      {/* Title */}
-      <div>
-        <h2 className="text-xl font-bold text-slate-800 font-display">{t('diario_title')}</h2>
-        <span className="text-xs text-slate-600">{t('diario_subtitle')}</span>
+      {/* Title with Back Button */}
+      <div className="flex items-center space-x-3">
+        <button 
+          onClick={() => navigate('/dashboard')}
+          className="p-2 bg-white hover:bg-slate-100 border border-slate-200/60 rounded-xl text-slate-600 hover:text-slate-800 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none"
+          aria-label="Torna alla Dashboard"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <div>
+          <h2 className="text-xl font-bold text-slate-800 font-display !my-0">{t('diario_title')}</h2>
+          <span className="text-xs text-slate-600 block">{t('diario_subtitle')}</span>
+        </div>
       </div>
 
       {/* Date Filter Segmented Toggle */}

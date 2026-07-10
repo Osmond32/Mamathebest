@@ -12,7 +12,8 @@ import {
   Droplet,
   Utensils,
   Soup,
-  Scale
+  Scale,
+  Settings
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -229,41 +230,30 @@ export default function Dashboard({
               <span className="text-xs text-purple-700 font-bold ml-1">{language === 'it' ? 'cambi' : 'changes'}</span>
             </button>
 
-            {/* Aggiungi Attività Quick Actions Card */}
+            {/* Impostazioni Card */}
             <div className="bg-gradient-to-br from-slate-50 to-white border border-slate-200/60 rounded-3xl p-3 shadow-sm relative overflow-hidden flex flex-col justify-between">
-              <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide block mb-1.5">{t('add_activity')}</span>
-              <div className="grid grid-cols-4 gap-1.5 mt-1 items-center justify-items-center flex-1">
-                {/* Latte */}
+              <div className="flex items-center space-x-1.5 mb-2">
+                <Settings size={15} className="text-slate-600 animate-spin-slow shrink-0" />
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wide block">{language === 'it' ? 'Impostazioni' : 'Paramètres'}</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 mt-1.5 items-center justify-items-center flex-1 w-full">
+                {/* Diario */}
                 <button 
-                  onClick={() => onOpenLogModal('latte')}
-                  aria-label="Registra Latte"
-                  className="flex items-center justify-center w-11 h-11 bg-blue-50 hover:bg-blue-100 text-blue-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
+                  onClick={() => navigate('/diario')}
+                  aria-label={t('diario')}
+                  className="flex flex-col items-center justify-center w-full py-2 bg-primary-50 hover:bg-primary-100 text-primary-600 rounded-2xl transition-all duration-200 active:scale-95 shadow-sm cursor-pointer focus:outline-none"
                 >
-                  <BiberonIcon className="w-5 h-5 shrink-0" />
+                  <Calendar size={18} className="mb-1" />
+                  <span className="text-[10px] font-bold">{t('diario')}</span>
                 </button>
-                {/* Pappa */}
+                {/* Profilo / Impostazioni */}
                 <button 
-                  onClick={() => onOpenLogModal('pappa')}
-                  aria-label="Registra Pappa"
-                  className="flex items-center justify-center w-11 h-11 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
+                  onClick={() => navigate('/profilo')}
+                  aria-label={t('profilo')}
+                  className="flex flex-col items-center justify-center w-full py-2 bg-rose-50 hover:bg-rose-100 text-rose-500 rounded-2xl transition-all duration-200 active:scale-95 shadow-sm cursor-pointer focus:outline-none"
                 >
-                  <Soup className="w-5 h-5 shrink-0" />
-                </button>
-                {/* Peso */}
-                <button 
-                  onClick={() => onOpenLogModal('peso')}
-                  aria-label="Registra Peso"
-                  className="flex items-center justify-center w-11 h-11 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
-                >
-                  <Scale className="w-5 h-5 shrink-0" />
-                </button>
-                {/* Evacuazione */}
-                <button 
-                  onClick={() => onOpenLogModal('evacuazione')}
-                  aria-label="Registra Evacuazione"
-                  className="flex items-center justify-center w-11 h-11 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-full transition-all duration-200 active:scale-90 shadow-sm cursor-pointer focus:outline-none"
-                >
-                  <DiaperIcon className="w-5 h-5 shrink-0" />
+                  <Settings size={18} className="mb-1" />
+                  <span className="text-[10px] font-bold">{t('profilo')}</span>
                 </button>
               </div>
             </div>

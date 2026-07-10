@@ -280,7 +280,7 @@ function AppContent() {
 
 
       {/* Bottom Navigation */}
-      <BottomNav />
+      <BottomNav onOpenLogModal={setLogModalType} />
 
       {/* Action modal picker */}
       <LogModal 

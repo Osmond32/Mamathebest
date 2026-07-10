@@ -9,9 +9,11 @@ import {
   ChevronRight,
   Database,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft
 } from 'lucide-react';
 import { useClerk } from '@clerk/clerk-react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function Profilo({
@@ -24,6 +26,7 @@ export default function Profilo({
   selectedBambinoId
 }) {
   const { signOut } = useClerk();
+  const navigate = useNavigate();
   const { t, language } = useLanguage();
   const locale = language === 'it' ? 'it-IT' : 'fr-FR';
   
@@ -226,11 +229,20 @@ export default function Profilo({
 
   return (
     <div className="space-y-6 pb-28 animate-slide-up">
-      {/* Title */}
+      {/* Title with Back Button */}
       <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800 font-display">{t('profile_title')}</h2>
-          <span className="text-xs text-slate-600">{t('profile_subtitle')}</span>
+        <div className="flex items-center space-x-3">
+          <button 
+            onClick={() => navigate('/dashboard')}
+            className="p-2 bg-white hover:bg-slate-100 border border-slate-200/60 rounded-xl text-slate-600 hover:text-slate-800 transition-all duration-200 active:scale-95 shadow-sm focus:outline-none"
+            aria-label="Torna alla Dashboard"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div>
+            <h2 className="text-xl font-bold text-slate-800 font-display !my-0">{t('profile_title')}</h2>
+            <span className="text-xs text-slate-600 block">{t('profile_subtitle')}</span>
+          </div>
         </div>
         <button
           onClick={() => signOut()}
