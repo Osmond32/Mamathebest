@@ -179,7 +179,7 @@ function AppContent() {
           onClick={() => navigate('/dashboard')}
           className="flex items-center space-x-2 shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
         >
-          <img src={logo} alt="Mamathebest logo" className="w-8 h-8 rounded-xl object-cover shadow-sm border border-primary-100" />
+          <img src={logo} alt="Mamathebest logo" className="w-12 h-12 rounded-xl object-cover shadow-sm border border-primary-100" />
           <h1 className="text-sm font-black text-slate-800 tracking-tight font-display uppercase hidden xs:block !my-0">Mamathebest</h1>
         </div>
 
